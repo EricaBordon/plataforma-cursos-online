@@ -144,3 +144,20 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API REST para plataforma de cursos online tipo Udemy',
     'VERSION': '1.0.0',
 }
+
+# Usuario personalizado
+AUTH_USER_MODEL = 'users.User'
+
+# SimpleJWT
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Media (avatars)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

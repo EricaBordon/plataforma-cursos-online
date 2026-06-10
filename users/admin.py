@@ -1,3 +1,26 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import User, Profile
 
-# Register your models here.
+
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin):
+    inlines = [ProfileInline]
+    list_display = ['email', 'username', 'role', 'is_active']
+    list_filter = ['role', 'is_active']
+    search_fields = ['email', 'username']
+    ordering = ['-date_joined']
+    fieldsets = BaseUserAdmin.fieldsets + (
+        ('Rol', {'fields': ('role',)}),
+    )
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'birthdate', 'created_at']
+    search_fields = ['user__email']
