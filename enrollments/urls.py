@@ -1,43 +1,7 @@
-# from rest_framework.routers import DefaultRouter
+from django.urls import path
+from .views import EnrollmentListCreateView, EnrollmentDetailView
 
-# from .views import (
-#     EnrollmentViewSet,
-#     LessonProgressViewSet
-# )
-
-# router = DefaultRouter()
-
-# router.register(
-#     'enrollments',
-#     EnrollmentViewSet,
-#     basename='enrollments'
-# )
-
-# router.register(
-#     'progress',
-#     LessonProgressViewSet,
-#     basename='progress'
-# )
-
-# urlpatterns = router.urlsfrom rest_framework.routers import DefaultRouter
-
-# from .views import (
-#     EnrollmentViewSet,
-#     LessonProgressViewSet
-# )
-
-# router = DefaultRouter()
-
-# router.register(
-#     'enrollments',
-#     EnrollmentViewSet,
-#     basename='enrollments'
-# )
-
-# router.register(
-#     'progress',
-#     LessonProgressViewSet,
-#     basename='progress'
-# )
-
-# urlpatterns = router.urls
+urlpatterns = [
+    path("", EnrollmentListCreateView.as_view(), name="enrollment-list-create"),
+    path("<int:pk>/", EnrollmentDetailView.as_view(), name="enrollment-detail"),
+]

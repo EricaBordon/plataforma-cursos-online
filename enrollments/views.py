@@ -1,32 +1,19 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-
-from .models import Enrollment, LessonProgress
-from .serializers import (
-    EnrollmentSerializer,
-    LessonProgressSerializer
-)
+from rest_framework import generics
+from .models import Enrollment
+from .serializers import EnrollmentSerializer
 
 
-class EnrollmentViewSet(viewsets.ModelViewSet):
+class EnrollmentListCreateView(generics.ListCreateAPIView):
     """
-    CRUD de inscripciones.
+    Lista todas las inscripciones y permite crear nuevas.
     """
-
     queryset = Enrollment.objects.all()
-
     serializer_class = EnrollmentSerializer
 
-    permission_classes = [IsAuthenticated]
 
-
-class LessonProgressViewSet(viewsets.ModelViewSet):
+class EnrollmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    CRUD de progreso de lecciones.
+    Obtiene, actualiza o elimina una inscripción específica.
     """
-
-    queryset = LessonProgress.objects.all()
-
-    serializer_class = LessonProgressSerializer
-
-    permission_classes = [IsAuthenticated]
+    queryset = Enrollment.objects.all()
+    serializer_class = EnrollmentSerializer
