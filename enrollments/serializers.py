@@ -1,35 +1,30 @@
 from rest_framework import serializers
-from django.utils import timezone
-
-from .models import Enrollment, LessonProgress
+from .models import Enrollment
 
 
 class EnrollmentSerializer(serializers.ModelSerializer):
-    """
-    Serializer para inscripciones.
-    """
+    student_name = serializers.StringRelatedField(source="student", read_only=True)
+    course_name = serializers.StringRelatedField(source="course", read_only=True)
 
     class Meta:
         model = Enrollment
-        fields = '__all__'
+        fields = [
+            "id",
+            "student",
+            "student_name",
+            "course",
+            "course_name",
+            "status",
+            "progress_status",
+            "progress_percentage",
+            "enrolled_at",
+            "updated_at",
+        ]
+        read_only_fields = ["enrolled_at", "updated_at"]
 
-
-class LessonProgressSerializer(serializers.ModelSerializer):
-    """
-    Serializer para progreso de lecciones.
-    """
-
-    class Meta:
-        model = LessonProgress
-        fields = '__all__'
-
-    def update(self, instance, validated_data):
-
-        # Si la lección se marca como completada,
-        # guardar fecha de finalización.
-        if validated_data.get('is_completed'):
-
-            if not instance.is_completed:
-                validated_data['completed_at'] = timezone.now()
-
-        return super().update(instance, validated_data)
+    def validate_progress_percentage(self, value):
+        if value < 0 or value > 100:
+            raise serializers.ValidationError(
+                "El porcentaje de progreso debe estar entre 0 y 100."
+            )
+        return value
