@@ -21,9 +21,6 @@ class EnrollmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
 
-    from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-
 
 @login_required(login_url="/admin/login/")
 def student_dashboard(request):
