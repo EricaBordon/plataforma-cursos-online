@@ -221,3 +221,6 @@ __marimo__/
 # Archivos multimedia y estáticos
 media/
 staticfiles/
+
+
+.env
