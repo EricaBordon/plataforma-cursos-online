@@ -1,7 +1,23 @@
+PAYMENT_STATUS_PENDING = "pending"
+PAYMENT_STATUS_APPROVED = "approved"
+PAYMENT_STATUS_REJECTED = "rejected"
+PAYMENT_STATUS_CANCELLED = "cancelled"
+
 PAYMENT_STATUS_CHOICES = [
-    ("pending", "Pendiente"),
-    ("approved", "Aprobado"),
-    ("rejected", "Rechazado"),
+    (PAYMENT_STATUS_PENDING, "Pendiente"),
+    (PAYMENT_STATUS_APPROVED, "Aprobado"),
+    (PAYMENT_STATUS_REJECTED, "Rechazado"),
+    (PAYMENT_STATUS_CANCELLED, "Cancelado"),
 ]
 
-PAYMENT_PROVIDER_MERCADOPAGO = "mercadopago"
+PAYMENT_METHOD_CARD = "card"
+PAYMENT_METHOD_TRANSFER = "transfer"
+PAYMENT_METHOD_CASH = "cash"
+PAYMENT_METHOD_MERCADOPAGO = "mercadopago"
+
+PAYMENT_METHOD_CHOICES = [
+    (PAYMENT_METHOD_CARD, "Tarjeta"),
+    (PAYMENT_METHOD_TRANSFER, "Transferencia"),
+    (PAYMENT_METHOD_CASH, "Efectivo"),
+    (PAYMENT_METHOD_MERCADOPAGO, "MercadoPago"),
+]
