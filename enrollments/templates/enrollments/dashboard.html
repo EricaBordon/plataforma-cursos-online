@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Mi dashboard{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <div class="mb-4">
+        <h1 class="fw-bold">Mi aprendizaje</h1>
+        <p class="text-muted">
+            Aquí puedes ver los cursos en los que estás inscrito.
+        </p>
+    </div>
+
+    <div class="row g-4">
+
+        {% for enrollment in enrollments %}
+
+            <div class="col-md-4">
+
+                <div class="card h-100 shadow-sm border-0">
+
+                    {% if enrollment.course.thumbnail %}
+                        <img src="{{ enrollment.course.thumbnail.url }}"
+                             class="card-img-top"
+                             alt="{{ enrollment.course.title }}">
+                    {% else %}
+                        <div class="bg-primary text-white d-flex align-items-center justify-content-center"
+                             style="height: 180px;">
+                            <span class="fs-4 fw-bold">Curso Online</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="card-body">
+
+                        <h5 class="card-title fw-bold">
+                            {{ enrollment.course.title }}
+                        </h5>
+
+                        <p class="text-muted">
+                            {{ enrollment.course.description|truncatewords:18 }}
+                        </p>
+
+                        <p>
+                            <strong>Estado:</strong>
+                            {{ enrollment.get_status_display }}
+                        </p>
+
+                        <p>
+                            <strong>Progreso:</strong>
+                            {{ enrollment.progress_percentage }}%
+                        </p>
+
+                        <div class="progress mb-3">
+                            <div class="progress-bar"
+                                 role="progressbar"
+                                 aria-valuenow="{{ enrollment.progress_percentage }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                                {{ enrollment.progress_percentage }}%
+                            </div>
+                        </div>
+
+                        <a href="{% url 'course-detail-web' enrollment.course.id %}"
+                           class="btn btn-primary w-100">
+                            Continuar curso
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Todavía no estás inscrito en ningún curso.
+                </div>
+
+                <a href="/" class="btn btn-primary">
+                    Explorar cursos
+                </a>
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".progress-bar").forEach(function (bar) {
+            const value = bar.getAttribute("aria-valuenow");
+            bar.style.width = value + "%";
+        });
+    });
+</script>
+
+{% endblock %}
