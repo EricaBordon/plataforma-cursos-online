@@ -17,6 +17,9 @@ urlpatterns = [
 
     #certificados
     path("api/certificates/", include("certificates.urls")),
+
+    #cursos 
+    path("", include("courses.urls")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
