@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Mis certificados{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <div class="mb-4">
+        <h1 class="fw-bold">Mis certificados</h1>
+
+        <p class="text-muted">
+            Certificados obtenidos por completar cursos.
+        </p>
+    </div>
+
+    {% if certificates %}
+
+        <div class="card shadow-sm">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover mb-0">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Curso</th>
+                            <th>Código</th>
+                            <th>Emitido</th>
+                            <th>Estado</th>
+                            <th>PDF</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for certificate in certificates %}
+
+                            <tr>
+
+                                <td>
+                                    {{ certificate.enrollment.course.title }}
+                                </td>
+
+                                <td>
+                                    {{ certificate.certificate_code }}
+                                </td>
+
+                                <td>
+                                    {{ certificate.issued_at|date:"d/m/Y H:i" }}
+                                </td>
+
+                                <td>
+
+                                    {% if certificate.is_valid %}
+                                        <span class="badge bg-success">
+                                            Válido
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            Revocado
+                                        </span>
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    {% if certificate.pdf_file %}
+                                        <a href="{{ certificate.pdf_file.url }}"
+                                           class="btn btn-sm btn-primary"
+                                           target="_blank">
+                                           Descargar
+                                        </a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    {% else %}
+
+        <div class="alert alert-info">
+            Todavía no tienes certificados emitidos.
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}
