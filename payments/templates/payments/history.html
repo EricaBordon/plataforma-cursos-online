@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Mis pagos{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <div class="mb-4">
+        <h1 class="fw-bold">Mis pagos</h1>
+        <p class="text-muted">
+            Historial de pagos realizados en la plataforma.
+        </p>
+    </div>
+
+    {% if payments %}
+
+        <div class="card shadow-sm">
+
+            <div class="card-body p-0">
+
+                <table class="table table-hover mb-0">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Curso</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                            <th>Método</th>
+                            <th>Transacción</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for payment in payments %}
+
+                            <tr>
+
+                                <td>
+                                    {{ payment.enrollment.course.title }}
+                                </td>
+
+                                <td>
+                                    ₲ {{ payment.amount }}
+                                </td>
+
+                                <td>
+
+                                    {% if payment.status == "approved" %}
+
+                                        <span class="badge bg-success">
+                                            Aprobado
+                                        </span>
+
+                                    {% elif payment.status == "pending" %}
+
+                                        <span class="badge bg-warning text-dark">
+                                            Pendiente
+                                        </span>
+
+                                    {% elif payment.status == "rejected" %}
+
+                                        <span class="badge bg-danger">
+                                            Rechazado
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge bg-secondary">
+                                            Cancelado
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+                                    {{ payment.get_payment_method_display }}
+                                </td>
+
+                                <td>
+                                    {{ payment.transaction_id|default:"-" }}
+                                </td>
+
+                                <td>
+
+                                    {% if payment.paid_at %}
+                                        {{ payment.paid_at|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    {% else %}
+
+        <div class="alert alert-info">
+            Todavía no tienes pagos registrados.
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}
