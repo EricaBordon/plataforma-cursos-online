@@ -61,11 +61,25 @@
 
                             {% if user.role == "student" %}
 
-                                {% if can_access_content %}
-                                    <div class="alert alert-success mb-0">
-                                        Ya tenés acceso a este curso.
-                                    </div>
+                                {% if enrollment %}
+
+                                    {% if enrollment.status == "paid" %}
+
+                                        <div class="alert alert-success mb-0">
+                                            Curso adquirido correctamente.
+                                        </div>
+
+                                    {% else %}
+
+                                        <a href="{% url 'simulate-payment' enrollment.id %}"
+                                           class="btn btn-success w-100 btn-lg">
+                                            Pagar curso
+                                        </a>
+
+                                    {% endif %}
+
                                 {% else %}
+
                                     <form method="post"
                                           action="{% url 'course-enroll-web' course.id %}">
                                         {% csrf_token %}
@@ -74,24 +88,30 @@
                                             Inscribirme
                                         </button>
                                     </form>
+
                                 {% endif %}
 
                             {% elif user.role == "instructor" %}
+
                                 <div class="alert alert-info mb-0">
                                     Estás viendo este curso como instructor.
                                 </div>
 
                             {% elif user.role == "admin" or user.is_staff %}
+
                                 <div class="alert alert-secondary mb-0">
                                     Estás viendo este curso como administrador.
                                 </div>
+
                             {% endif %}
 
                         {% else %}
+
                             <a href="/admin/login/"
                                class="btn btn-primary w-100 btn-lg">
                                 Iniciar sesión para inscribirse
                             </a>
+
                         {% endif %}
                     </div>
 
@@ -178,10 +198,35 @@
                                             </a>
                                         {% endif %}
 
+                                        {% if user.role == "student" %}
+
+                                            {% if lesson.id in completed_lesson_ids %}
+
+                                                <div class="alert alert-success mt-3 mb-0">
+                                                    Lección completada.
+                                                </div>
+
+                                            {% else %}
+
+                                                <form method="post"
+                                                      action="{% url 'mark-lesson-completed' lesson.id %}"
+                                                      class="mt-3">
+                                                    {% csrf_token %}
+
+                                                    <button type="submit"
+                                                            class="btn btn-success btn-sm">
+                                                        Marcar como completada
+                                                    </button>
+                                                </form>
+
+                                            {% endif %}
+
+                                        {% endif %}
+
                                     {% else %}
 
                                         <div class="alert alert-light border mt-3 mb-0">
-                                             Vista previa del temario. El contenido completo, video y materiales estarán disponibles después de inscribirte y completar el pago.
+                                            Vista previa del temario. El contenido completo, video y materiales estarán disponibles después de inscribirte y completar el pago.
                                         </div>
 
                                     {% endif %}

@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
-from enrollments.models import Enrollment
+from enrollments.models import Enrollment, LessonProgress
 from .forms import (
     CourseForm,
     ModuleForm,
@@ -68,6 +68,7 @@ def course_detail(request, pk):
     course.price_display = f"{int(course.price):,}".replace(",", ".")
 
     can_access_content = False
+    completed_lesson_ids = []
 
     if request.user.is_authenticated:
 
@@ -78,18 +79,38 @@ def course_detail(request, pk):
             can_access_content = True
 
         elif request.user.role == "student":
-            can_access_content = Enrollment.objects.filter(
+            enrollment = Enrollment.objects.filter(
                 student=request.user,
                 course=course,
                 status="paid"
-            ).exists()
+            ).first()
+
+            if enrollment:
+                can_access_content = True
+
+                completed_lesson_ids = list(
+                    LessonProgress.objects.filter(
+                        enrollment=enrollment,
+                        is_completed=True
+                    ).values_list("lesson_id", flat=True)
+                )
+    enrollment = None
+
+    if request.user.is_authenticated:
+
+        enrollment = Enrollment.objects.filter(
+            student=request.user,
+            course=course
+    ).first()
 
     return render(
         request,
         "courses/course_detail.html",
         {
             "course": course,
-            "can_access_content": can_access_content
+            "can_access_content": can_access_content,
+            "completed_lesson_ids": completed_lesson_ids,
+            "enrollment": enrollment,
         }
     )
 
