@@ -108,6 +108,28 @@ class AnswerOption(models.Model):
     def __str__(self):
         return self.text
 
+class QuizAttempt(models.Model):
+    quiz = models.ForeignKey(
+        Quiz,
+        on_delete=models.CASCADE,
+        related_name="attempts"
+    )
+    enrollment = models.ForeignKey(
+        "enrollments.Enrollment",
+        on_delete=models.CASCADE,
+        related_name="quiz_attempts"
+    )
+    score = models.PositiveIntegerField(default=0)
+    passed = models.BooleanField(default=False)
+    attempt_number = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.enrollment.student} - {self.quiz.title} - Intento {self.attempt_number}"
+
 class Review(models.Model):
 
     student = models.ForeignKey(

@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
-
+from certificates.models import Certificate
 from enrollments.models import Enrollment, LessonProgress
 from .forms import (
     CourseForm,
@@ -11,6 +11,7 @@ from .forms import (
     QuizForm,
     QuestionForm,
     AnswerOptionForm,
+    
 )
 
 from .models import (
@@ -20,6 +21,7 @@ from .models import (
     Quiz,
     Question,
     AnswerOption,
+    QuizAttempt,
 )
 
 
@@ -47,7 +49,7 @@ def home(request):
 
     return render(
         request,
-        "courses/home.html",
+        "courses/public/home.html",
         {"courses": courses}
     )
 
@@ -69,8 +71,15 @@ def course_detail(request, pk):
 
     can_access_content = False
     completed_lesson_ids = []
+    enrollment = None
+    progress_percentage = 0
 
     if request.user.is_authenticated:
+
+        enrollment = Enrollment.objects.filter(
+            student=request.user,
+            course=course
+        ).first()
 
         if request.user.is_staff or request.user.role == "admin":
             can_access_content = True
@@ -78,15 +87,11 @@ def course_detail(request, pk):
         elif request.user.role == "instructor" and course.instructor == request.user:
             can_access_content = True
 
-        elif request.user.role == "student":
-            enrollment = Enrollment.objects.filter(
-                student=request.user,
-                course=course,
-                status="paid"
-            ).first()
+        elif request.user.role == "student" and enrollment:
 
-            if enrollment:
+            if enrollment.status == "paid":
                 can_access_content = True
+                progress_percentage = enrollment.progress_percentage
 
                 completed_lesson_ids = list(
                     LessonProgress.objects.filter(
@@ -94,23 +99,16 @@ def course_detail(request, pk):
                         is_completed=True
                     ).values_list("lesson_id", flat=True)
                 )
-    enrollment = None
-
-    if request.user.is_authenticated:
-
-        enrollment = Enrollment.objects.filter(
-            student=request.user,
-            course=course
-    ).first()
 
     return render(
         request,
-        "courses/course_detail.html",
+        "courses/public/course_detail.html",
         {
             "course": course,
             "can_access_content": can_access_content,
             "completed_lesson_ids": completed_lesson_ids,
             "enrollment": enrollment,
+            "progress_percentage": progress_percentage,
         }
     )
 
@@ -191,7 +189,7 @@ def course_create(request):
 
     return render(
         request,
-        "courses/course_form.html",
+        "courses/instructor/course_form.html",
         {"form": form}
     )
 
@@ -230,7 +228,7 @@ def course_update(request, pk):
 
     return render(
         request,
-        "courses/course_form.html",
+        "courses/instructor/course_form.html",
         {
             "form": form,
             "course": course
@@ -262,7 +260,7 @@ def course_delete(request, pk):
 
     return render(
         request,
-        "courses/course_confirm_delete.html",
+        "courses/instructor/course_confirm_delete.html",
         {"course": course}
     )
 
@@ -299,7 +297,7 @@ def module_create(request, course_id):
 
     return render(
         request,
-        "courses/module_form.html",
+        "courses/instructor/module_form.html",
         {
             "form": form,
             "course": course
@@ -339,7 +337,7 @@ def lesson_create(request, module_id):
 
     return render(
         request,
-        "courses/lesson_form.html",
+        "courses/instructor/lesson_form.html",
         {
             "form": form,
             "module": module
@@ -371,7 +369,7 @@ def module_update(request, pk):
 
     return render(
         request,
-        "courses/module_form.html",
+        "courses/instructor/module_form.html",
         {
             "form": form,
             "course": module.course,
@@ -399,7 +397,7 @@ def module_delete(request, pk):
 
     return render(
         request,
-        "courses/module_confirm_delete.html",
+        "courses/instructor/module_confirm_delete.html",
         {"module": module}
     )
 
@@ -429,7 +427,7 @@ def lesson_update(request, pk):
 
     return render(
         request,
-        "courses/lesson_form.html",
+        "courses/instructor/lesson_form.html",
         {
             "form": form,
             "module": lesson.module,
@@ -457,7 +455,7 @@ def lesson_delete(request, pk):
 
     return render(
         request,
-        "courses/lesson_confirm_delete.html",
+        "courses/instructor/lesson_confirm_delete.html",
         {"lesson": lesson}
     )
 
@@ -494,7 +492,7 @@ def quiz_create(request, course_id):
 
     return render(
         request,
-        "courses/quiz_form.html",
+        "courses/instructor/quiz_form.html",
         {
             "form": form,
             "course": course
@@ -527,7 +525,7 @@ def quiz_update(request, pk):
 
     return render(
         request,
-        "courses/quiz_form.html",
+        "courses/instructor/quiz_form.html",
         {
             "form": form,
             "course": quiz.course,
@@ -555,7 +553,7 @@ def quiz_delete(request, pk):
 
     return render(
         request,
-        "courses/quiz_confirm_delete.html",
+        "courses/instructor/quiz_confirm_delete.html",
         {"quiz": quiz}
     )
 
@@ -588,7 +586,7 @@ def question_create(request, quiz_id):
 
     return render(
         request,
-        "courses/question_form.html",
+        "courses/instructor/question_form.html",
         {
             "form": form,
             "quiz": quiz
@@ -621,7 +619,7 @@ def question_update(request, pk):
 
     return render(
         request,
-        "courses/question_form.html",
+        "courses/instructor/question_form.html",
         {
             "form": form,
             "quiz": question.quiz,
@@ -649,7 +647,7 @@ def question_delete(request, pk):
 
     return render(
         request,
-        "courses/question_confirm_delete.html",
+        "courses/instructor/question_confirm_delete.html",
         {"question": question}
     )
 
@@ -682,7 +680,7 @@ def answer_create(request, question_id):
 
     return render(
         request,
-        "courses/answer_form.html",
+        "courses/instructor/answer_form.html",
         {
             "form": form,
             "question": question
@@ -715,7 +713,7 @@ def answer_update(request, pk):
 
     return render(
         request,
-        "courses/answer_form.html",
+        "courses/instructor/answer_form.html",
         {
             "form": form,
             "question": answer.question,
@@ -743,6 +741,178 @@ def answer_delete(request, pk):
 
     return render(
         request,
-        "courses/answer_confirm_delete.html",
+        "courses/instructor/answer_confirm_delete.html",
         {"answer": answer}
+    )
+
+
+@login_required(login_url="/admin/login/")
+def take_quiz(request, course_id):
+    """
+    Permite al estudiante rendir el examen final.
+    Máximo 2 intentos.
+    Si aprueba, genera certificado.
+    """
+
+    course = get_object_or_404(
+        Course,
+        pk=course_id,
+        is_published=True
+    )
+
+    quiz = get_object_or_404(
+        Quiz,
+        course=course,
+        is_active=True
+    )
+
+    enrollment = Enrollment.objects.filter(
+        student=request.user,
+        course=course,
+        status="paid"
+    ).first()
+
+    if not enrollment:
+        return HttpResponseForbidden(
+            "Debes inscribirte y pagar el curso para rendir el examen."
+        )
+
+    if enrollment.progress_percentage < 100:
+        return HttpResponseForbidden(
+            "Debes completar todas las lecciones antes de rendir el examen."
+        )
+
+    approved_attempt = QuizAttempt.objects.filter(
+        enrollment=enrollment,
+        quiz=quiz,
+        passed=True
+    ).first()
+
+    if approved_attempt:
+        certificate = Certificate.objects.filter(
+            enrollment=enrollment
+        ).first()
+
+        return render(
+            request,
+            "courses/student/quiz_result.html",
+            {
+                "quiz": quiz,
+                "course": course,
+                "score": approved_attempt.score,
+                "passed": True,
+                "attempts_used": QuizAttempt.objects.filter(
+                    enrollment=enrollment,
+                    quiz=quiz
+                ).count(),
+                "max_attempts": 2,
+                "certificate": certificate,
+            }
+        )
+
+    attempts_used = QuizAttempt.objects.filter(
+        enrollment=enrollment,
+        quiz=quiz
+    ).count()
+
+    max_attempts = 2
+
+    if attempts_used >= max_attempts:
+        return render(
+            request,
+            "courses/student/quiz_result.html",
+            {
+                "quiz": quiz,
+                "course": course,
+                "score": 0,
+                "passed": False,
+                "attempts_used": attempts_used,
+                "max_attempts": max_attempts,
+                "no_attempts_left": True,
+                "certificate": None,
+            }
+        )
+
+    if request.method == "POST":
+
+        total_points = 0
+        earned_points = 0
+
+        for question in quiz.questions.all():
+
+            total_points += question.points
+
+            selected_option_id = request.POST.get(
+                f"question_{question.id}"
+            )
+
+            if selected_option_id:
+
+                selected_option = AnswerOption.objects.filter(
+                    id=selected_option_id,
+                    question=question
+                ).first()
+
+                if selected_option and selected_option.is_correct:
+                    earned_points += question.points
+
+        score = 0
+
+        if total_points > 0:
+            score = round(
+                (earned_points / total_points) * 100
+            )
+
+        passed = score >= quiz.passing_score
+
+        attempt = QuizAttempt.objects.create(
+            quiz=quiz,
+            enrollment=enrollment,
+            score=score,
+            passed=passed,
+            attempt_number=attempts_used + 1
+        )
+
+        certificate = None
+
+        if passed:
+            enrollment.mark_as_completed()
+
+            certificate, created = Certificate.objects.get_or_create(
+                enrollment=enrollment
+            )
+
+            messages.success(
+                request,
+                "Aprobaste el examen final. Tu certificado ya está disponible."
+            )
+        else:
+            messages.warning(
+                request,
+                "No alcanzaste el puntaje mínimo."
+            )
+
+        return render(
+            request,
+            "courses/student/quiz_result.html",
+            {
+                "quiz": quiz,
+                "course": course,
+                "score": score,
+                "passed": passed,
+                "attempts_used": attempt.attempt_number,
+                "max_attempts": max_attempts,
+                "certificate": certificate,
+            }
+        )
+
+    return render(
+        request,
+        "courses/student/take_quiz.html",
+        {
+            "quiz": quiz,
+            "course": course,
+            "attempts_used": attempts_used,
+            "max_attempts": max_attempts,
+        }
     )

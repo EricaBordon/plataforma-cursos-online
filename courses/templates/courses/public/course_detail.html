@@ -40,6 +40,12 @@
                     <p>
                         <strong>Módulos:</strong> {{ course.modules.count }}
                     </p>
+
+                    {% if user.is_authenticated and user.role == "student" and enrollment %}
+                        <p>
+                            <strong>Progreso:</strong> {{ progress_percentage }}%
+                        </p>
+                    {% endif %}
                 </div>
             </div>
 
@@ -64,18 +70,14 @@
                                 {% if enrollment %}
 
                                     {% if enrollment.status == "paid" %}
-
                                         <div class="alert alert-success mb-0">
                                             Curso adquirido correctamente.
                                         </div>
-
                                     {% else %}
-
                                         <a href="{% url 'simulate-payment' enrollment.id %}"
                                            class="btn btn-success w-100 btn-lg">
                                             Pagar curso
                                         </a>
-
                                     {% endif %}
 
                                 {% else %}
@@ -201,13 +203,10 @@
                                         {% if user.role == "student" %}
 
                                             {% if lesson.id in completed_lesson_ids %}
-
                                                 <div class="alert alert-success mt-3 mb-0">
                                                     Lección completada.
                                                 </div>
-
                                             {% else %}
-
                                                 <form method="post"
                                                       action="{% url 'mark-lesson-completed' lesson.id %}"
                                                       class="mt-3">
@@ -218,7 +217,6 @@
                                                         Marcar como completada
                                                     </button>
                                                 </form>
-
                                             {% endif %}
 
                                         {% endif %}
@@ -257,6 +255,80 @@
         {% endfor %}
 
     </div>
+
+    <hr class="my-5">
+
+    <h2 class="fw-bold mb-4">
+        Examen final
+    </h2>
+
+    {% if course.quiz %}
+
+        {% if can_access_content %}
+
+            {% if progress_percentage == 100 %}
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+
+                        <h4 class="fw-bold">
+                            {{ course.quiz.title }}
+                        </h4>
+
+                        {% if course.quiz.description %}
+                            <p class="text-muted">
+                                {{ course.quiz.description }}
+                            </p>
+                        {% endif %}
+
+                        <p class="mb-1">
+                            <strong>Puntaje mínimo:</strong>
+                            {{ course.quiz.passing_score }}%
+                        </p>
+
+                        <p class="mb-3">
+                            <strong>Preguntas:</strong>
+                            {{ course.quiz.questions.count }}
+                        </p>
+
+                        {% if course.quiz.is_active %}
+                            <a href="{% url 'take-quiz' course.id %}"
+                               class="btn btn-primary">
+                                Rendir examen final
+                            </a>
+                        {% else %}
+                            <div class="alert alert-secondary mb-0">
+                                El examen final todavía no está activo.
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            {% else %}
+
+                <div class="alert alert-warning">
+                    Debes completar todas las lecciones del curso para acceder al examen final.
+                    Progreso actual: {{ progress_percentage }}%.
+                </div>
+
+            {% endif %}
+
+        {% else %}
+
+            <div class="alert alert-warning">
+                Debes inscribirte y completar el pago para acceder al examen final.
+            </div>
+
+        {% endif %}
+
+    {% else %}
+
+        <div class="alert alert-info">
+            Este curso todavía no tiene examen final configurado.
+        </div>
+
+    {% endif %}
 
 </section>
 

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Resultado del examen{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <div class="card shadow">
+
+        <div class="card-body text-center">
+
+            <h1 class="fw-bold mb-4">
+                Resultado del examen
+            </h1>
+
+            {% if no_attempts_left %}
+
+                <div class="alert alert-danger">
+                    Ya utilizaste los {{ max_attempts }} intentos permitidos para este examen.
+                </div>
+
+            {% else %}
+
+                <h2 class="display-5 mb-3">
+                    {{ score }}%
+                </h2>
+
+                <p class="text-muted">
+                    Intentos utilizados: {{ attempts_used }} de {{ max_attempts }}
+                </p>
+
+                {% if passed %}
+
+                    <div class="alert alert-success">
+
+                        <h4 class="fw-bold">
+                            ¡Felicitaciones!
+                        </h4>
+
+                        <p>
+                            Has aprobado el examen final.
+                        </p>
+
+                        <p class="mb-0">
+                            Tu certificado también está disponible en la sección
+                            <strong>Mis certificados</strong>.
+                        </p>
+
+                    </div>
+
+                    {% if certificate and certificate.pdf_file %}
+                        <a href="{{ certificate.pdf_file.url }}"
+                           class="btn btn-success mt-3"
+                           target="_blank">
+                            Descargar certificado
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'my-certificates' %}"
+                       class="btn btn-outline-primary mt-3">
+                        Ver mis certificados
+                    </a>
+
+                {% else %}
+
+                    <div class="alert alert-danger">
+
+                        <h4 class="fw-bold">
+                            Examen no aprobado
+                        </h4>
+
+                        <p>
+                            Necesitas al menos {{ quiz.passing_score }}% para aprobar.
+                        </p>
+
+                        {% if attempts_used < max_attempts %}
+                            <p class="mb-0">
+                                Todavía puedes volver a intentarlo.
+                            </p>
+                        {% else %}
+                            <p class="mb-0">
+                                Ya no tienes intentos disponibles.
+                            </p>
+                        {% endif %}
+
+                    </div>
+
+                    {% if attempts_used < max_attempts %}
+                        <a href="{% url 'take-quiz' course.id %}"
+                           class="btn btn-warning mt-3">
+                            Volver a intentar
+                        </a>
+                    {% endif %}
+
+                {% endif %}
+
+            {% endif %}
+
+            <a href="{% url 'course-detail-web' course.id %}"
+               class="btn btn-primary mt-3">
+                Volver al curso
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

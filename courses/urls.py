@@ -129,4 +129,9 @@ urlpatterns = [
         views.answer_delete,
         name="answer-delete"
     ),
+    path(
+    "courses/<int:course_id>/quiz/",
+    views.take_quiz,
+    name="take-quiz",
+    ),
 ]
