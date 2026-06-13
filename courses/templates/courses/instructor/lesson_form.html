@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Agregar lección{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+
+            <h1 class="fw-bold mb-3">
+                Agregar lección
+            </h1>
+
+            <p class="text-muted">
+                Módulo: <strong>{{ module.title }}</strong>
+            </p>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        Guardar lección
+                    </button>
+
+                    <a href="{% url 'instructor-dashboard' %}"
+                       class="btn btn-secondary">
+                        Cancelar
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}

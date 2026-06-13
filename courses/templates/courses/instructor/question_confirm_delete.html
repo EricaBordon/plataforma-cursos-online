@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Eliminar pregunta{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="card border-danger">
+
+        <div class="card-body">
+
+            <h2 class="text-danger">
+                Eliminar pregunta
+            </h2>
+
+            <p>
+                ¿Deseas eliminar esta pregunta?
+            </p>
+
+            <p>
+                <strong>{{ question.text }}</strong>
+            </p>
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <button type="submit"
+                        class="btn btn-danger">
+                    Eliminar
+                </button>
+
+                <a href="{% url 'instructor-dashboard' %}"
+                   class="btn btn-secondary">
+                    Cancelar
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Agregar módulo{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+
+            <h1 class="fw-bold mb-3">
+                Agregar módulo
+            </h1>
+
+            <p class="text-muted">
+                Curso: <strong>{{ course.title }}</strong>
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        Guardar módulo
+                    </button>
+
+                    <a href="{% url 'instructor-dashboard' %}"
+                       class="btn btn-secondary">
+                        Cancelar
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}

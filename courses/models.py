@@ -52,6 +52,8 @@ class Lesson(models.Model):
     module   = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='lessons')
     title    = models.CharField(max_length=200)
     content  = models.TextField(blank=True)
+    video    = models.FileField(upload_to="lessons/videos/", null=True, blank=True)
+    attachment = models.FileField(upload_to="lessons/files/", null=True, blank=True)
     order    = models.PositiveIntegerField(default=0)
     duration = models.PositiveIntegerField(default=0)
 
@@ -61,7 +63,72 @@ class Lesson(models.Model):
     def __str__(self):
         return self.title
 
+class Quiz(models.Model):
+    course = models.OneToOneField(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="quiz"
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    passing_score = models.PositiveIntegerField(default=70)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"Examen de {self.course.title}"
+
+
+class Question(models.Model):
+    quiz = models.ForeignKey(
+        Quiz,
+        on_delete=models.CASCADE,
+        related_name="questions"
+    )
+    text = models.TextField()
+    order = models.PositiveIntegerField(default=0)
+    points = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.text[:80]
+
+
+class AnswerOption(models.Model):
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+        related_name="options"
+    )
+    text = models.CharField(max_length=255)
+    is_correct = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.text
+
+class QuizAttempt(models.Model):
+    quiz = models.ForeignKey(
+        Quiz,
+        on_delete=models.CASCADE,
+        related_name="attempts"
+    )
+    enrollment = models.ForeignKey(
+        "enrollments.Enrollment",
+        on_delete=models.CASCADE,
+        related_name="quiz_attempts"
+    )
+    score = models.PositiveIntegerField(default=0)
+    passed = models.BooleanField(default=False)
+    attempt_number = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.enrollment.student} - {self.quiz.title} - Intento {self.attempt_number}"
 
 class Review(models.Model):
 

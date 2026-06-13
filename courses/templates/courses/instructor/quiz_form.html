@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Examen final{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h1 class="mb-4">
+
+        {% if quiz %}
+            Editar examen final
+        {% else %}
+            Crear examen final
+        {% endif %}
+
+    </h1>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <button type="submit" class="btn btn-primary">
+                    Guardar examen
+                </button>
+
+                <a href="{% url 'instructor-dashboard' %}"
+                   class="btn btn-secondary">
+                    Cancelar
+                </a>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

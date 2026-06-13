@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.db import models
+from courses.models import Course, Lesson
 
-from courses.models import Course
+
 from .constants import (
     ENROLLMENT_STATUS_CHOICES,
     PROGRESS_NOT_STARTED,
@@ -80,3 +81,43 @@ class Enrollment(models.Model):
         self.progress_status = PROGRESS_COMPLETED
         self.progress_percentage = 100
         self.save()
+
+
+class LessonProgress(models.Model):
+    """
+    Registra qué lecciones completó un estudiante
+    dentro de una inscripción.
+    """
+
+    enrollment = models.ForeignKey(
+        Enrollment,
+        on_delete=models.CASCADE,
+        related_name="lesson_progress",
+        verbose_name="Inscripción"
+    )
+
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        related_name="progress_records",
+        verbose_name="Lección"
+    )
+
+    is_completed = models.BooleanField(
+        default=False,
+        verbose_name="Completada"
+    )
+
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de finalización"
+    )
+
+    class Meta:
+        verbose_name = "Progreso de lección"
+        verbose_name_plural = "Progresos de lecciones"
+        unique_together = ("enrollment", "lesson")
+
+    def __str__(self):
+        return f"{self.enrollment.student} - {self.lesson.title}"

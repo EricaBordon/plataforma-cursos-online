@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}Mis cursos{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">Mis cursos</h1>
+            <p class="text-muted">
+                Gestiona tus cursos, módulos, lecciones y exámenes.
+            </p>
+        </div>
+
+        <a href="{% url 'course-create' %}" class="btn btn-primary">
+            Crear curso
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        {% for course in courses %}
+
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                            <div>
+                                <h3 class="fw-bold">
+                                    {{ course.title }}
+                                </h3>
+
+                                <p class="text-muted">
+                                    {{ course.description|truncatewords:25 }}
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Precio:</strong> ₲ {{ course.price }}
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Módulos:</strong> {{ course.modules.count }}
+                                </p>
+
+                                <p>
+                                    <strong>Estado:</strong>
+
+                                    {% if course.is_published %}
+                                        <span class="badge bg-success">Publicado</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Borrador</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap justify-content-end">
+
+                                <a href="{% url 'course-update' course.id %}"
+                                   class="btn btn-outline-primary btn-sm">
+                                    Editar curso
+                                </a>
+
+                                <a href="{% url 'course-delete' course.id %}"
+                                   class="btn btn-outline-danger btn-sm">
+                                    Eliminar curso
+                                </a>
+
+                                <a href="{% url 'module-create' course.id %}"
+                                   class="btn btn-outline-success btn-sm">
+                                    Agregar módulo
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                        <hr>
+
+                        <h5 class="fw-bold mb-3">
+                            Módulos del curso
+                        </h5>
+
+                        {% for module in course.modules.all %}
+
+                            <div class="border rounded p-3 mb-3 bg-light">
+
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                                    <div>
+                                        <h6 class="fw-bold mb-1">
+                                            {{ module.order }}. {{ module.title }}
+                                        </h6>
+
+                                        <small class="text-muted">
+                                            {{ module.lessons.count }} lecciones
+                                        </small>
+                                    </div>
+
+                                    <div class="d-flex gap-2 flex-wrap">
+
+                                        <a href="{% url 'lesson-create' module.id %}"
+                                           class="btn btn-sm btn-primary">
+                                            Agregar lección
+                                        </a>
+
+                                        <a href="{% url 'module-update' module.id %}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Editar módulo
+                                        </a>
+
+                                        <a href="{% url 'module-delete' module.id %}"
+                                           class="btn btn-sm btn-outline-danger">
+                                            Eliminar módulo
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                                <ul class="list-group mt-3">
+
+                                    {% for lesson in module.lessons.all %}
+
+                                        <li class="list-group-item">
+
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                                                <div>
+                                                    <span>
+                                                        {{ lesson.order }}. {{ lesson.title }}
+                                                    </span>
+
+                                                    <span class="badge bg-secondary ms-2">
+                                                        {{ lesson.duration }} min
+                                                    </span>
+
+                                                    {% if lesson.video %}
+                                                        <span class="badge bg-info text-dark ms-2">
+                                                            Video
+                                                        </span>
+                                                    {% endif %}
+
+                                                    {% if lesson.attachment %}
+                                                        <span class="badge bg-success ms-2">
+                                                            Archivo
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+
+                                                <div class="d-flex gap-2 flex-wrap">
+
+                                                    <a href="{% url 'lesson-update' lesson.id %}"
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        Editar
+                                                    </a>
+
+                                                    <a href="{% url 'lesson-delete' lesson.id %}"
+                                                       class="btn btn-sm btn-outline-danger">
+                                                        Eliminar
+                                                    </a>
+
+                                                </div>
+
+                                            </div>
+
+                                        </li>
+
+                                    {% empty %}
+
+                                        <li class="list-group-item text-muted">
+                                            Este módulo todavía no tiene lecciones.
+                                        </li>
+
+                                    {% endfor %}
+
+                                </ul>
+
+                            </div>
+
+                        {% empty %}
+
+                            <div class="alert alert-warning">
+                                Este curso todavía no tiene módulos.
+                            </div>
+
+                        {% endfor %}
+
+                        <hr>
+
+                        <h5 class="fw-bold mb-3">
+                            Examen final
+                        </h5>
+
+                        {% if course.quiz %}
+
+                            <div class="border rounded p-3 bg-light">
+
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                                    <div>
+                                        <h6 class="fw-bold mb-1">
+                                            {{ course.quiz.title }}
+                                        </h6>
+
+                                        <small class="text-muted">
+                                            Puntaje mínimo: {{ course.quiz.passing_score }}%
+                                            · {{ course.quiz.questions.count }} preguntas
+                                        </small>
+
+                                        {% if course.quiz.is_active %}
+                                            <span class="badge bg-success ms-2">
+                                                Activo
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary ms-2">
+                                                Inactivo
+                                            </span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="d-flex gap-2 flex-wrap">
+
+                                        <a href="{% url 'question-create' course.quiz.id %}"
+                                           class="btn btn-sm btn-primary">
+                                            Agregar pregunta
+                                        </a>
+
+                                        <a href="{% url 'quiz-update' course.quiz.id %}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Editar examen
+                                        </a>
+
+                                        <a href="{% url 'quiz-delete' course.quiz.id %}"
+                                           class="btn btn-sm btn-outline-danger">
+                                            Eliminar examen
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                                <ul class="list-group mt-3">
+
+                                    {% for question in course.quiz.questions.all %}
+
+                                        <li class="list-group-item">
+
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                                                <div>
+                                                    <strong>
+                                                        {{ question.order }}. {{ question.text }}
+                                                    </strong>
+
+                                                    <span class="badge bg-secondary ms-2">
+                                                        {{ question.points }} pts
+                                                    </span>
+
+                                                    <span class="badge bg-info text-dark ms-2">
+                                                        {{ question.options.count }} opciones
+                                                    </span>
+                                                </div>
+
+                                                <div class="d-flex gap-2 flex-wrap">
+
+                                                    <a href="{% url 'answer-create' question.id %}"
+                                                       class="btn btn-sm btn-success">
+                                                        Agregar opción
+                                                    </a>
+
+                                                    <a href="{% url 'question-update' question.id %}"
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        Editar
+                                                    </a>
+
+                                                    <a href="{% url 'question-delete' question.id %}"
+                                                       class="btn btn-sm btn-outline-danger">
+                                                        Eliminar
+                                                    </a>
+
+                                                </div>
+
+                                            </div>
+
+                                            <ul class="mt-3">
+
+                                                {% for option in question.options.all %}
+
+                                                    <li class="mb-2">
+                                                        {{ option.text }}
+
+                                                        {% if option.is_correct %}
+                                                            <span class="badge bg-success">
+                                                                Correcta
+                                                            </span>
+                                                        {% endif %}
+
+                                                        <a href="{% url 'answer-update' option.id %}"
+                                                           class="btn btn-sm btn-outline-primary ms-2">
+                                                            Editar
+                                                        </a>
+
+                                                        <a href="{% url 'answer-delete' option.id %}"
+                                                           class="btn btn-sm btn-outline-danger ms-1">
+                                                            Eliminar
+                                                        </a>
+                                                    </li>
+
+                                                {% empty %}
+
+                                                    <li class="text-muted">
+                                                        Esta pregunta todavía no tiene opciones.
+                                                    </li>
+
+                                                {% endfor %}
+
+                                            </ul>
+
+                                        </li>
+
+                                    {% empty %}
+
+                                        <li class="list-group-item text-muted">
+                                            Este examen todavía no tiene preguntas.
+                                        </li>
+
+                                    {% endfor %}
+
+                                </ul>
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="alert alert-warning">
+                                Este curso todavía no tiene examen final.
+                            </div>
+
+                            <a href="{% url 'quiz-create' course.id %}"
+                               class="btn btn-outline-primary btn-sm">
+                                Crear examen final
+                            </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+            </div>
+
+        {% empty %}
+
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Todavía no creaste ningún curso.
+                </div>
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}
