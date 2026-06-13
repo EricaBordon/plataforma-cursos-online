@@ -155,7 +155,7 @@ def instructor_dashboard(request):
 
     return render(
         request,
-        "courses/instructor_dashboard.html",
+        "courses/instructor/instructor_dashboard.html",
         {"courses": courses}
     )
 
