@@ -18,15 +18,45 @@
             <a class="btn btn-outline-light me-2" href="/">Cursos</a>
 
             {% if user.is_authenticated %}
-                <a class="btn btn-outline-light me-2" href="{% url 'student-dashboard' %}">
-                     Mi aprendizaje
+
+                {% if user.role == "student" %}
+                    <a class="btn btn-outline-light me-2" href="{% url 'student-dashboard' %}">
+                        Mi aprendizaje
+                    </a>
+
+                    <a href="{% url 'payment-history' %}" class="btn btn-outline-light me-2">
+                        Mis pagos
+                    </a>
+
+                    <a href="{% url 'my-certificates' %}" class="btn btn-outline-light me-2">
+                        Mis certificados
+                    </a>
+                {% endif %}
+
+                {% if user.role == "instructor" %}
+                    <a class="btn btn-outline-light me-2" href="#">
+                        Mis cursos
+                    </a>
+
+                    <a class="btn btn-outline-light me-2" href="#">
+                        Crear curso
+                    </a>
+                {% endif %}
+
+                {% if user.role == "admin" or user.is_staff %}
+                    <a class="btn btn-primary me-2" href="/admin/">
+                        Panel
+                    </a>
+                {% endif %}
+
+                <a class="btn btn-outline-warning" href="{% url 'logout' %}">
+                    Cerrar sesión
                 </a>
-                <a href="{% url 'payment-history' %}" class="btn btn-outline-light"> Mis pagos</a>
-                <a href="{% url 'my-certificates' %}" class="btn btn-outline-light"> Mis certificados</a>
-                <a class="btn btn-primary me-2" href="/admin/">Panel</a>
-                <a class="btn btn-outline-warning" href="{% url 'logout' %}">Cerrar sesión</a>
+
             {% else %}
-                <a class="btn btn-primary" href="{% url 'login' %}">Iniciar sesión</a>
+                <a class="btn btn-primary" href="{% url 'login' %}">
+                    Iniciar sesión
+                </a>
             {% endif %}
         </div>
     </div>
