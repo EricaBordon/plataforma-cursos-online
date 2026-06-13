@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Course, Module, Lesson
+from .models import Category, Course, Module, Lesson, Review
 
 
 class LessonInline(admin.TabularInline):
@@ -49,3 +49,17 @@ class LessonAdmin(admin.ModelAdmin):
     list_display = ("id", "title", "module", "order", "duration")
     list_filter = ("module",)
     search_fields = ("title", "module__title")
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = (
+        "course",
+        "student",
+        "rating",
+        "created_at",
+    )
+
+    list_filter = (
+        "rating",
+        "created_at",
+    )

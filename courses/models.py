@@ -1,6 +1,10 @@
 from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
+from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
+
+
 User = get_user_model()
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -56,3 +60,42 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.title
+
+
+
+class Review(models.Model):
+
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="reviews"
+    )
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="reviews"
+    )
+
+    rating = models.PositiveSmallIntegerField(
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(5)
+        ],
+        verbose_name="Calificación"
+    )
+
+    comment = models.TextField(
+        verbose_name="Comentario"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        unique_together = ("student", "course")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.course.title} - {self.rating}/5"
