@@ -45,9 +45,17 @@
                     </a>
                 {% endif %}
 
-                <a class="btn btn-outline-warning" href="{% url 'logout' %}">
-                    Cerrar sesión
-                </a>
+                <span class="navbar-text text-light me-3" style="font-size: 0.9rem;">
+    👤
+    {% if user.get_full_name %}
+        {{ user.get_full_name }}
+    {% else %}
+        {{ user.username }}
+    {% endif %}
+</span>
+<a class="btn btn-outline-warning" href="{% url 'logout' %}">
+    Cerrar sesión
+</a>
 
             {% else %}
                 <a class="btn btn-primary" href="{% url 'login' %}">

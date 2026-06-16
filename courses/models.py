@@ -6,9 +6,14 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 User = get_user_model()
+
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Categoría'
+        verbose_name_plural = 'Categorías'
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -29,6 +34,10 @@ class Course(models.Model):
     is_published = models.BooleanField(default=False)
     created_at  = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = 'Curso'
+        verbose_name_plural = 'Cursos'
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
@@ -44,6 +53,8 @@ class Module(models.Model):
 
     class Meta:
         ordering = ['order']
+        verbose_name = 'Módulo'
+        verbose_name_plural = 'Módulos'
 
     def __str__(self):
         return self.title
@@ -59,6 +70,8 @@ class Lesson(models.Model):
 
     class Meta:
         ordering = ['order']
+        verbose_name = 'Lección'
+        verbose_name_plural = 'Lecciones'
 
     def __str__(self):
         return self.title
@@ -74,6 +87,10 @@ class Quiz(models.Model):
     passing_score = models.PositiveIntegerField(default=70)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Examen'
+        verbose_name_plural = 'Exámenes'
 
     def __str__(self):
         return f"Examen de {self.course.title}"
@@ -91,6 +108,8 @@ class Question(models.Model):
 
     class Meta:
         ordering = ["order"]
+        verbose_name = 'Pregunta'
+        verbose_name_plural = 'Preguntas'
 
     def __str__(self):
         return self.text[:80]
@@ -104,6 +123,10 @@ class AnswerOption(models.Model):
     )
     text = models.CharField(max_length=255)
     is_correct = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Opción de respuesta'
+        verbose_name_plural = 'Opciones de respuesta'
 
     def __str__(self):
         return self.text
@@ -126,43 +149,37 @@ class QuizAttempt(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        verbose_name = 'Intento de examen'
+        verbose_name_plural = 'Intentos de examen'
 
     def __str__(self):
         return f"{self.enrollment.student} - {self.quiz.title} - Intento {self.attempt_number}"
 
 class Review(models.Model):
-
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="reviews"
     )
-
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
         related_name="reviews"
     )
-
     rating = models.PositiveSmallIntegerField(
-        validators=[
-            MinValueValidator(1),
-            MaxValueValidator(5)
-        ],
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
         verbose_name="Calificación"
     )
-
     comment = models.TextField(
         verbose_name="Comentario"
     )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ("student", "course")
         ordering = ["-created_at"]
+        verbose_name = 'Reseña'
+        verbose_name_plural = 'Reseñas'
 
     def __str__(self):
         return f"{self.course.title} - {self.rating}/5"

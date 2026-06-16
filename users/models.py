@@ -5,9 +5,9 @@ from django.dispatch import receiver
 
 
 class Role(models.TextChoices):
-    ADMIN      = 'admin',      'Admin'
+    ADMIN      = 'admin',      'Administrador'
     INSTRUCTOR = 'instructor', 'Instructor'
-    STUDENT    = 'student',    'Student'
+    STUDENT    = 'student',    'Estudiante'
 
 
 class User(AbstractUser):
@@ -23,6 +23,8 @@ class User(AbstractUser):
 
     class Meta:
         db_table = 'users'
+        verbose_name = 'Usuario'
+        verbose_name_plural = 'Usuarios'
 
     def __str__(self):
         return f'{self.email} ({self.role})'
@@ -37,6 +39,8 @@ class Profile(models.Model):
 
     class Meta:
         db_table = 'user_profiles'
+        verbose_name = 'Perfil'
+        verbose_name_plural = 'Perfiles'
 
     def __str__(self):
         return f'Perfil de {self.user.email}'
