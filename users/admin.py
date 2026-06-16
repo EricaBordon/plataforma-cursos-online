@@ -19,8 +19,19 @@ class UserAdmin(BaseUserAdmin):
         ('Rol', {'fields': ('role',)}),
     )
 
+    class Media:
+        css = {'all': ('admin/css/custom_admin.css',)}
+
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'birthdate', 'created_at']
     search_fields = ['user__email']
+
+    class Media:
+        css = {'all': ('admin/css/custom_admin.css',)}
+
+
+admin.site.site_header = "Northdemy Admin"
+admin.site.site_title = "Northdemy"
+admin.site.index_title = "Panel de administración"
