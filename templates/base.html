@@ -14,7 +14,7 @@
     <div class="container">
         <a class="navbar-brand fw-bold" href="/">Northdemy</a>
 
-        <div class="ms-auto">
+        <div class="ms-auto d-flex align-items-center">
             <a class="btn btn-outline-light me-2" href="/">Cursos</a>
 
             {% if user.is_authenticated %}
@@ -34,9 +34,13 @@
                 {% endif %}
 
                 {% if user.role == "instructor" %}
-                    <a class="btn btn-outline-light me-2" href="{% url 'instructor-dashboard' %}"> Mis cursos </a>
+                    <a class="btn btn-outline-light me-2" href="{% url 'instructor-dashboard' %}">
+                        Mis cursos
+                    </a>
 
-                    <a class="btn btn-outline-light me-2" href="{% url 'course-create' %}">    Crear curso </a>
+                    <a class="btn btn-outline-light me-2" href="{% url 'course-create' %}">
+                        Crear curso
+                    </a>
                 {% endif %}
 
                 {% if user.role == "admin" or user.is_staff %}
@@ -46,16 +50,16 @@
                 {% endif %}
 
                 <span class="navbar-text text-light me-3" style="font-size: 0.9rem;">
-    👤
-    {% if user.get_full_name %}
-        {{ user.get_full_name }}
-    {% else %}
-        {{ user.username }}
-    {% endif %}
-</span>
-<a class="btn btn-outline-warning" href="{% url 'logout' %}">
-    Cerrar sesión
-</a>
+                    👤
+                    {% if user.get_full_name %}
+                        {{ user.get_full_name }}
+                    {% else %}
+                        {{ user.username }}
+                    {% endif %}
+                </span>
+                <a class="btn btn-outline-warning" href="{% url 'logout' %}">
+                    Cerrar sesión
+                </a>
 
             {% else %}
                 <a class="btn btn-primary" href="{% url 'login' %}">
@@ -78,8 +82,8 @@
     {% endfor %}
 
 </div>
-
 {% endif %}
+
 <main>
     {% block content %}{% endblock %}
 </main>
