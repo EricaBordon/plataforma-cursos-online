@@ -1,0 +1,102 @@
+:root {
+    --nd-dark: #1a1d29;
+    --nd-dark-2: #212529;
+    --nd-blue: #0d6efd;
+    --nd-blue-hover: #0b5ed7;
+    --nd-light: #f8f9fa;
+    --nd-border: #e3e6ea;
+}
+
+#header {
+    background: linear-gradient(135deg, var(--nd-dark) 0%, #232838 100%);
+    color: #fff;
+    padding: 14px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+#header a:link, #header a:visited { color: #fff; }
+
+#branding h1 {
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+}
+#branding h1 a:link, #branding h1 a:visited { color: #fff; }
+
+#user-tools { font-size: 13px; }
+#user-tools a { border-bottom: 1px solid transparent; transition: border-color .2s; }
+#user-tools a:hover { border-bottom-color: var(--nd-blue); }
+
+body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; color: #2c2f36; }
+
+.module h2, .module caption, .inline-group h2 {
+    background: var(--nd-dark);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 14px;
+    border-radius: 6px 6px 0 0;
+}
+.module {
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+div.breadcrumbs {
+    background: var(--nd-dark-2);
+    color: #c9ccd1;
+    padding: 10px 24px;
+    font-size: 13px;
+}
+div.breadcrumbs a { color: #9fc4ff; }
+div.breadcrumbs a:hover { color: #fff; }
+
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background: var(--nd-blue);
+    color: #fff;
+    border-radius: 6px;
+    border: none;
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: background .2s, transform .1s;
+}
+.button:hover, input[type=submit]:hover, a.button:hover {
+    background: var(--nd-blue-hover);
+    transform: translateY(-1px);
+}
+.deletelink { background: #dc3545 !important; }
+.deletelink:hover { background: #bb2d3b !important; }
+
+a:link, a:visited { color: var(--nd-blue); }
+a:hover { color: var(--nd-blue-hover); }
+
+#changelist table thead th {
+    background: var(--nd-light);
+    font-weight: 600;
+    border-bottom: 2px solid var(--nd-border);
+}
+#changelist table tbody tr:hover { background-color: #f1f6ff; }
+
+input, textarea, select {
+    border-radius: 6px !important;
+    border: 1px solid var(--nd-border) !important;
+    padding: 6px 10px !important;
+}
+input:focus, textarea:focus, select:focus {
+    border-color: var(--nd-blue) !important;
+    box-shadow: 0 0 0 2px rgba(13,110,253,.15) !important;
+    outline: none;
+}
+fieldset.module { border: 1px solid var(--nd-border); }
+
+body.login {
+    background: linear-gradient(135deg, var(--nd-dark) 0%, #2b3245 100%);
+}
+.login #container { border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+
+.paginator a.this-page {
+    background: var(--nd-blue);
+    color: #fff;
+    border-radius: 4px;
+}
