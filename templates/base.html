@@ -4,83 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}EduPlatform{% endblock %}</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; }
+        .navbar { box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .navbar-brand { font-size: 1.5rem; color: #f59e0b !important; }
+        .nav-btn { border-radius: 20px; font-size: 0.85rem; padding: 6px 14px; }
+        footer { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+        main { min-height: 80vh; }
+    </style>
 </head>
 
 <body class="bg-light">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/">Northdemy</a>
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-mortarboard-fill me-2"></i>Northdemy
+        </a>
 
-        <div class="ms-auto">
-            <a class="btn btn-outline-light me-2" href="/">Cursos</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            {% if user.is_authenticated %}
-
-                {% if user.role == "student" %}
-                    <a class="btn btn-outline-light me-2" href="{% url 'student-dashboard' %}">
-                        Mi aprendizaje
-                    </a>
-
-                    <a href="{% url 'payment-history' %}" class="btn btn-outline-light me-2">
-                        Mis pagos
-                    </a>
-
-                    <a href="{% url 'my-certificates' %}" class="btn btn-outline-light me-2">
-                        Mis certificados
-                    </a>
-                {% endif %}
-
-                {% if user.role == "instructor" %}
-                    <a class="btn btn-outline-light me-2" href="{% url 'instructor-dashboard' %}"> Mis cursos </a>
-
-                    <a class="btn btn-outline-light me-2" href="{% url 'course-create' %}">    Crear curso </a>
-                {% endif %}
-
-                {% if user.role == "admin" or user.is_staff %}
-                    <a class="btn btn-primary me-2" href="/admin/">
-                        Panel
-                    </a>
-                {% endif %}
-
-                <a class="btn btn-outline-warning" href="{% url 'logout' %}">
-                    Cerrar sesión
+        <div class="collapse navbar-collapse" id="navMenu">
+            <div class="ms-auto d-flex flex-wrap gap-2 align-items-center">
+                <a class="btn btn-outline-light nav-btn" href="/">
+                    <i class="bi bi-grid me-1"></i>Cursos
                 </a>
 
-            {% else %}
-                <a class="btn btn-primary" href="{% url 'login' %}">
-                    Iniciar sesión
-                </a>
-            {% endif %}
+                {% if user.is_authenticated %}
+                    {% if user.role == "student" %}
+                        <a class="btn btn-outline-light nav-btn" href="{% url 'student-dashboard' %}">
+                            <i class="bi bi-book me-1"></i>Mi aprendizaje
+                        </a>
+                        <a class="btn btn-outline-light nav-btn" href="{% url 'payment-history' %}">
+                            <i class="bi bi-credit-card me-1"></i>Mis pagos
+                        </a>
+                        <a class="btn btn-outline-light nav-btn" href="{% url 'my-certificates' %}">
+                            <i class="bi bi-award me-1"></i>Mis certificados
+                        </a>
+                    {% endif %}
+
+                    {% if user.role == "instructor" %}
+                        <a class="btn btn-outline-light nav-btn" href="{% url 'instructor-dashboard' %}">
+                            <i class="bi bi-easel me-1"></i>Mis cursos
+                        </a>
+                        <a class="btn btn-outline-success nav-btn" href="{% url 'course-create' %}">
+                            <i class="bi bi-plus-circle me-1"></i>Crear curso
+                        </a>
+                    {% endif %}
+
+                    {% if user.role == "admin" or user.is_staff %}
+                        <a class="btn btn-primary nav-btn" href="/admin/">
+                            <i class="bi bi-shield-lock me-1"></i>Panel
+                        </a>
+                    {% endif %}
+
+                    <a class="btn btn-outline-warning nav-btn" href="{% url 'logout' %}">
+                        <i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión
+                    </a>
+
+                {% else %}
+                    <a class="btn btn-primary nav-btn" href="{% url 'login' %}">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </nav>
 
 {% if messages %}
 <div class="container mt-3">
-
     {% for message in messages %}
-
-        <div class="alert alert-{{ message.tags }}">
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
             {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-
     {% endfor %}
-
 </div>
-
 {% endif %}
+
 <main>
     {% block content %}{% endblock %}
 </main>
 
-<footer class="bg-dark text-white text-center py-4 mt-5">
-    <p class="mb-0">Plataforma de Cursos Online · Django + PostgreSQL</p>
+<footer class="text-white text-center py-4 mt-5">
+    <p class="mb-0">
+        <i class="bi bi-mortarboard-fill me-2 text-warning"></i>
+        Northdemy · Plataforma de Cursos Online
+    </p>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>
