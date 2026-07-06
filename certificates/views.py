@@ -1,29 +1,72 @@
 from rest_framework import generics
-from .models import Certificate
-from .serializers import CertificateSerializer
+from rest_framework.permissions import IsAuthenticated
+
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
+from .models import Certificate
+from .serializers import CertificateSerializer
+
+
 class CertificateListCreateView(generics.ListCreateAPIView):
     """
-    Lista todos los certificados y permite crear nuevos certificados.
+    Lista los certificados según el usuario autenticado
+    y permite crear nuevos certificados desde la API.
     """
-    queryset = Certificate.objects.all()
     serializer_class = CertificateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff or user.role == "admin":
+            return Certificate.objects.select_related(
+                "enrollment",
+                "enrollment__student",
+                "enrollment__course"
+            ).all()
+
+        return Certificate.objects.select_related(
+            "enrollment",
+            "enrollment__student",
+            "enrollment__course"
+        ).filter(
+            enrollment__student=user
+        )
 
 
 class CertificateDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Obtiene, actualiza o elimina un certificado específico.
+    Obtiene, actualiza o elimina un certificado específico
+    respetando los permisos del usuario autenticado.
     """
-    queryset = Certificate.objects.all()
     serializer_class = CertificateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff or user.role == "admin":
+            return Certificate.objects.select_related(
+                "enrollment",
+                "enrollment__student",
+                "enrollment__course"
+            ).all()
+
+        return Certificate.objects.select_related(
+            "enrollment",
+            "enrollment__student",
+            "enrollment__course"
+        ).filter(
+            enrollment__student=user
+        )
 
 
-
-@login_required(login_url="/login/")
+@login_required
 def my_certificates(request):
-
+    """
+    Muestra los certificados del estudiante autenticado.
+    """
     certificates = Certificate.objects.select_related(
         "enrollment",
         "enrollment__course"

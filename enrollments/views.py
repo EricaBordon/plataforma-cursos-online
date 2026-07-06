@@ -4,29 +4,65 @@ from django.contrib import messages
 from django.utils import timezone
 
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 
 from courses.models import Lesson
-from certificates.models import Certificate
+
 from .models import Enrollment, LessonProgress
 from .serializers import EnrollmentSerializer
 
+
 class EnrollmentListCreateView(generics.ListCreateAPIView):
     """
-    Lista todas las inscripciones y permite crear nuevas.
+    Lista las inscripciones según el usuario autenticado
+    y permite crear nuevas inscripciones desde la API.
     """
-    queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff or user.role == "admin":
+            return Enrollment.objects.select_related(
+                "student",
+                "course"
+            ).all()
+
+        return Enrollment.objects.select_related(
+            "student",
+            "course"
+        ).filter(
+            student=user
+        )
 
 
 class EnrollmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Obtiene, actualiza o elimina una inscripción específica.
+    Obtiene, actualiza o elimina una inscripción específica
+    respetando los permisos del usuario autenticado.
     """
-    queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff or user.role == "admin":
+            return Enrollment.objects.select_related(
+                "student",
+                "course"
+            ).all()
+
+        return Enrollment.objects.select_related(
+            "student",
+            "course"
+        ).filter(
+            student=user
+        )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 def student_dashboard(request):
     """
     Muestra los cursos inscritos del estudiante autenticado.
@@ -40,7 +76,7 @@ def student_dashboard(request):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 def mark_lesson_completed(request, lesson_id):
     """
     Marca una lección como completada para el estudiante autenticado.
@@ -100,13 +136,11 @@ def mark_lesson_completed(request, lesson_id):
     if enrollment.progress_percentage >= 100:
         enrollment.progress_status = "completed"
 
-        Certificate.objects.get_or_create(
-            enrollment=enrollment
-        )
+       
 
         messages.success(
             request,
-            "Curso completado. Se generó tu certificado."
+            "¡Felicitaciones! Completaste todas las lecciones. Ya puedes rendir el examen final para obtener tu certificado."
         )
 
     elif enrollment.progress_percentage > 0:

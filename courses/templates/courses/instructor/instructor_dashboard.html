@@ -10,7 +10,7 @@
         <div>
             <h1 class="fw-bold">Mis cursos</h1>
             <p class="text-muted">
-                Gestiona tus cursos, módulos, lecciones y exámenes.
+                Gestiona tus cursos, módulos, lecciones, exámenes y estadísticas.
             </p>
         </div>
 
@@ -18,6 +18,56 @@
             Crear curso
         </a>
     </div>
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Cursos creados</h6>
+                    <h3 class="fw-bold mb-0">
+                        {{ stats.total_courses|default:0 }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Estudiantes inscritos</h6>
+                    <h3 class="fw-bold mb-0">
+                        {{ stats.total_students|default:0 }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Promedio de reseñas</h6>
+                    <h3 class="fw-bold mb-0">
+                        {{ stats.average_rating|default:0|floatformat:1 }} ★
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Ingresos simulados</h6>
+                    <h3 class="fw-bold mb-0">
+                        ₲ {{ stats.total_income|default:0 }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
 
     <div class="row g-4">
 
@@ -45,6 +95,26 @@
 
                                 <p class="mb-1">
                                     <strong>Módulos:</strong> {{ course.modules.count }}
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Estudiantes inscritos:</strong>
+                                    {{ course.total_students|default:0 }}
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Reseñas:</strong>
+                                    {{ course.total_reviews|default:0 }}
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Promedio de reseñas:</strong>
+                                    {{ course.average_rating|default:0|floatformat:1 }} ★
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Ingresos simulados:</strong>
+                                    ₲ {{ course.total_income|default:0 }}
                                 </p>
 
                                 <p>

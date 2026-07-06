@@ -134,4 +134,9 @@ urlpatterns = [
     views.take_quiz,
     name="take-quiz",
     ),
+    path(
+    "courses/<int:course_id>/review/",
+    views.add_review,
+    name="add-review",
+    ),
 ]

@@ -109,7 +109,7 @@
 
                         {% else %}
 
-                            <a href="/admin/login/"
+                            <a href="{% url 'login' %}"
                                class="btn btn-primary w-100 btn-lg">
                                 Iniciar sesión para inscribirse
                             </a>
@@ -326,6 +326,108 @@
 
         <div class="alert alert-info">
             Este curso todavía no tiene examen final configurado.
+        </div>
+
+    {% endif %}
+
+    <hr class="my-5">
+
+    <h2 class="fw-bold mb-4">
+        Reseñas del curso
+    </h2>
+
+    {% if can_review %}
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+
+                <h5 class="fw-bold mb-3">
+                    Dejar una reseña
+                </h5>
+
+                <form method="post"
+                      action="{% url 'add-review' course.id %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Calificación
+                        </label>
+                        {{ review_form.rating }}
+                        <small class="text-muted">
+                            Ingresa un número del 1 al 5.
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Comentario
+                        </label>
+                        {{ review_form.comment }}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Publicar reseña
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+    {% elif user_review %}
+
+        <div class="alert alert-info">
+            Ya dejaste una reseña para este curso.
+        </div>
+
+    {% endif %}
+
+    {% if reviews %}
+
+        <div class="row g-3">
+
+            {% for review in reviews %}
+
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between flex-wrap gap-2">
+                                <div>
+                                    <strong>
+                                        {% if review.student.get_full_name %}
+                                            {{ review.student.get_full_name }}
+                                        {% else %}
+                                            {{ review.student.username }}
+                                        {% endif %}
+                                    </strong>
+
+                                    <p class="text-muted mb-1">
+                                        {{ review.created_at|date:"d/m/Y H:i" }}
+                                    </p>
+                                </div>
+
+                                <span class="badge bg-warning text-dark align-self-start">
+                                    {{ review.rating }}/5 ★
+                                </span>
+                            </div>
+
+                            <p class="mb-0 mt-2">
+                                {{ review.comment }}
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="alert alert-secondary">
+            Este curso todavía no tiene reseñas.
         </div>
 
     {% endif %}

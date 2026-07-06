@@ -1,6 +1,6 @@
 from rest_framework import generics
-from .models import Payment
-from .serializers import PaymentSerializer
+from rest_framework.permissions import IsAuthenticated
+
 from django.shortcuts import (
     render,
     get_object_or_404,
@@ -11,24 +11,65 @@ from django.contrib import messages
 from django.utils import timezone
 
 from enrollments.models import Enrollment
+from .models import Payment
+from .serializers import PaymentSerializer
+
 
 class PaymentListCreateView(generics.ListCreateAPIView):
     """
-    Lista todos los pagos y permite registrar nuevos pagos.
+    Lista los pagos según el usuario autenticado
+    y permite registrar nuevos pagos desde la API.
     """
-    queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff or user.role == "admin":
+            return Payment.objects.select_related(
+                "enrollment",
+                "enrollment__student",
+                "enrollment__course"
+            ).all()
+
+        return Payment.objects.select_related(
+            "enrollment",
+            "enrollment__student",
+            "enrollment__course"
+        ).filter(
+            enrollment__student=user
+        )
 
 
 class PaymentDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Obtiene, actualiza o elimina un pago específico.
+    Obtiene, actualiza o elimina un pago específico
+    respetando los permisos del usuario autenticado.
     """
-    queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff or user.role == "admin":
+            return Payment.objects.select_related(
+                "enrollment",
+                "enrollment__student",
+                "enrollment__course"
+            ).all()
+
+        return Payment.objects.select_related(
+            "enrollment",
+            "enrollment__student",
+            "enrollment__course"
+        ).filter(
+            enrollment__student=user
+        )
 
 
-@login_required(login_url="/login/")
+@login_required
 def payment_history(request):
     """
     Historial de pagos del estudiante autenticado.
@@ -47,7 +88,7 @@ def payment_history(request):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 def simulate_payment(request, enrollment_id):
     """
     Simula un pago exitoso para pruebas.
@@ -70,10 +111,10 @@ def simulate_payment(request, enrollment_id):
     )
 
     if not created:
-
+        payment.amount = enrollment.course.price
         payment.status = "approved"
+        payment.transaction_id = payment.transaction_id or f"TEST-{enrollment.id}"
         payment.paid_at = timezone.now()
-
         payment.save()
 
     enrollment.status = "paid"

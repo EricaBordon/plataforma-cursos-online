@@ -1,9 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Avg, Sum, Q, DecimalField, Value
+from django.db.models.functions import Coalesce
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+
 from certificates.models import Certificate
 from enrollments.models import Enrollment, LessonProgress
+
 from .forms import (
     CourseForm,
     ModuleForm,
@@ -11,7 +15,7 @@ from .forms import (
     QuizForm,
     QuestionForm,
     AnswerOptionForm,
-    
+    ReviewForm,
 )
 
 from .models import (
@@ -22,6 +26,7 @@ from .models import (
     Question,
     AnswerOption,
     QuizAttempt,
+    Review,
 )
 
 
@@ -59,6 +64,7 @@ def course_detail(request, pk):
     Muestra el detalle de un curso publicado.
     El contenido completo solo se muestra si el estudiante pagó,
     o si el usuario es instructor/admin.
+    También muestra y habilita reseñas para estudiantes que pagaron el curso.
     """
 
     course = get_object_or_404(
@@ -73,6 +79,14 @@ def course_detail(request, pk):
     completed_lesson_ids = []
     enrollment = None
     progress_percentage = 0
+
+    reviews = Review.objects.select_related("student").filter(
+        course=course
+    )
+
+    user_review = None
+    can_review = False
+    review_form = ReviewForm()
 
     if request.user.is_authenticated:
 
@@ -100,6 +114,14 @@ def course_detail(request, pk):
                     ).values_list("lesson_id", flat=True)
                 )
 
+                user_review = Review.objects.filter(
+                    student=request.user,
+                    course=course
+                ).first()
+
+                if not user_review:
+                    can_review = True
+
     return render(
         request,
         "courses/public/course_detail.html",
@@ -109,11 +131,15 @@ def course_detail(request, pk):
             "completed_lesson_ids": completed_lesson_ids,
             "enrollment": enrollment,
             "progress_percentage": progress_percentage,
+            "reviews": reviews,
+            "review_form": review_form,
+            "can_review": can_review,
+            "user_review": user_review,
         }
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 def enroll_course(request, pk):
     """
     Permite que un usuario autenticado se inscriba a un curso.
@@ -143,24 +169,79 @@ def enroll_course(request, pk):
     return redirect("course-detail-web", pk=course.pk)
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def instructor_dashboard(request):
     """
-    Muestra al instructor solo los cursos que él creó.
+    Dashboard del instructor con estadísticas usando agregaciones de Django.
+    Usa annotate(), aggregate(), Count(), Avg() y Sum().
     """
+
+    money_field = DecimalField(max_digits=12, decimal_places=2)
+
     courses = Course.objects.filter(
         instructor=request.user
+    ).annotate(
+        total_students=Count(
+            "enrollments",
+            distinct=True
+        ),
+        total_reviews=Count(
+            "reviews",
+            distinct=True
+        ),
+        average_rating=Avg(
+            "reviews__rating"
+        ),
+        total_income=Coalesce(
+            Sum(
+                "enrollments__payments__amount",
+                filter=Q(enrollments__payments__status="approved"),
+                distinct=True
+            ),
+            Value(0, output_field=money_field),
+            output_field=money_field
+        ),
+    )
+
+    stats = courses.aggregate(
+        total_courses=Count(
+            "id",
+            distinct=True
+        ),
+        total_students=Count(
+            "enrollments",
+            distinct=True
+        ),
+        total_reviews=Count(
+            "reviews",
+            distinct=True
+        ),
+        average_rating=Avg(
+            "reviews__rating"
+        ),
+        total_income=Coalesce(
+            Sum(
+                "enrollments__payments__amount",
+                filter=Q(enrollments__payments__status="approved"),
+                distinct=True
+            ),
+            Value(0, output_field=money_field),
+            output_field=money_field
+        ),
     )
 
     return render(
         request,
         "courses/instructor/instructor_dashboard.html",
-        {"courses": courses}
+        {
+            "courses": courses,
+            "stats": stats,
+        }
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def course_create(request):
     """
@@ -194,7 +275,7 @@ def course_create(request):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def course_update(request, pk):
     """
@@ -236,7 +317,7 @@ def course_update(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def course_delete(request, pk):
     """
@@ -265,7 +346,7 @@ def course_delete(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def module_create(request, course_id):
     """
@@ -305,7 +386,7 @@ def module_create(request, course_id):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def lesson_create(request, module_id):
     """
@@ -344,7 +425,8 @@ def lesson_create(request, module_id):
         }
     )
 
-@login_required(login_url="/admin/login/")
+
+@login_required
 @instructor_required
 def module_update(request, pk):
     """
@@ -378,7 +460,7 @@ def module_update(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def module_delete(request, pk):
     """
@@ -402,7 +484,7 @@ def module_delete(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def lesson_update(request, pk):
     """
@@ -436,7 +518,7 @@ def lesson_update(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def lesson_delete(request, pk):
     """
@@ -460,7 +542,7 @@ def lesson_delete(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def quiz_create(request, course_id):
     """
@@ -500,7 +582,7 @@ def quiz_create(request, course_id):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def quiz_update(request, pk):
     """
@@ -534,7 +616,7 @@ def quiz_update(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def quiz_delete(request, pk):
     """
@@ -558,7 +640,7 @@ def quiz_delete(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def question_create(request, quiz_id):
     """
@@ -594,7 +676,7 @@ def question_create(request, quiz_id):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def question_update(request, pk):
     """
@@ -628,7 +710,7 @@ def question_update(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def question_delete(request, pk):
     """
@@ -652,7 +734,7 @@ def question_delete(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def answer_create(request, question_id):
     """
@@ -688,7 +770,7 @@ def answer_create(request, question_id):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def answer_update(request, pk):
     """
@@ -722,7 +804,7 @@ def answer_update(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 @instructor_required
 def answer_delete(request, pk):
     """
@@ -746,7 +828,7 @@ def answer_delete(request, pk):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required
 def take_quiz(request, course_id):
     """
     Permite al estudiante rendir el examen final.
@@ -916,3 +998,50 @@ def take_quiz(request, course_id):
             "max_attempts": max_attempts,
         }
     )
+
+@login_required
+def add_review(request, course_id):
+    """
+    Permite a un estudiante dejar una reseña de un curso pagado.
+    Solo se permite una reseña por estudiante y curso.
+    """
+
+    course = get_object_or_404(
+        Course,
+        pk=course_id,
+        is_published=True
+    )
+
+    enrollment = Enrollment.objects.filter(
+        student=request.user,
+        course=course,
+        status="paid"
+    ).first()
+
+    if not enrollment:
+        return HttpResponseForbidden(
+            "Solo puedes reseñar cursos en los que estás inscrito y pagado."
+        )
+
+    if Review.objects.filter(student=request.user, course=course).exists():
+        messages.info(
+            request,
+            "Ya dejaste una reseña para este curso."
+        )
+        return redirect("course-detail-web", pk=course.pk)
+
+    if request.method == "POST":
+        form = ReviewForm(request.POST)
+
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.student = request.user
+            review.course = course
+            review.save()
+
+            messages.success(
+                request,
+                "Tu reseña fue publicada correctamente."
+            )
+
+    return redirect("course-detail-web", pk=course.pk)
